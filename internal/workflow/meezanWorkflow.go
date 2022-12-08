@@ -1,17 +1,17 @@
 package myWorkflows
 
 import (
+	"Github/amc-apis-go/internal/activities"
 	"Github/amc-apis-go/internal/data"
 	"log"
-	"payment-apis/internal/activities"
-	"payment-apis/internal/data"
 	"time"
 
 	"go.temporal.io/sdk/workflow"
 )
 
-func MeezanWorkflow(ctx workflow.Context) (data.GetTokenStruct, error) {
-	var response data.GetTokenStruct
+func MeezanCreateAccWorkflow(ctx workflow.Context, input data.CreateAccountRequestStruct) (data.CreateAccountResponseStruct, error) {
+	var tokenResponse data.GetTokenStruct
+	var createAccResponse data.CreateAccountResponseStruct
 
 	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
 		TaskQueue:              "meezan",
@@ -22,12 +22,50 @@ func MeezanWorkflow(ctx workflow.Context) (data.GetTokenStruct, error) {
 		WaitForCancellation: false,
 	})
 
-	err := workflow.ExecuteActivity(ctx, activities.GetToken).Get(ctx, &response)
+	tokenErr := workflow.ExecuteActivity(ctx, activities.GetToken).Get(ctx, &tokenResponse)
 
-	if err != nil {
-		log.Print("Failure on executing activity")
-		log.Fatal(err, nil)
+	if tokenErr != nil {
+		log.Print("Failure on executing GetToken activity")
+		log.Fatal(tokenErr, nil)
 	}
 
-	return response, nil
+	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
+		TaskQueue:              "meezan",
+		ScheduleToCloseTimeout: 20 * time.Second,
+		//ScheduleToStartTimeout: 3 * time.Second,
+		StartToCloseTimeout: 20 * time.Second,
+		HeartbeatTimeout:    0 * time.Second,
+		WaitForCancellation: false,
+	})
+
+	createAccError := workflow.ExecuteActivity(ctx, activities.CreateAccount, input, tokenResponse.AccessToken).Get(ctx, &createAccResponse)
+
+	if createAccError != nil {
+		log.Print("Failure on executing CreateAccount activity")
+		log.Fatal(createAccError, nil)
+	}
+
+	return createAccResponse, nil
+}
+
+func TestWorkflow(ctx workflow.Context, n1 int, n2 int) (testReponse int, errs error) {
+	var testResponse int
+
+	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
+		TaskQueue:              "test",
+		ScheduleToCloseTimeout: 20 * time.Second,
+		//ScheduleToStartTimeout: 3 * time.Second,
+		StartToCloseTimeout: 20 * time.Second,
+		HeartbeatTimeout:    0 * time.Second,
+		WaitForCancellation: false,
+	})
+
+	testErr := workflow.ExecuteActivity(ctx, activities.TestActivity, 10, 20).Get(ctx, &testResponse)
+
+	if testErr != nil {
+		log.Print("Failure on executing Test activity")
+		log.Fatal(testErr, nil)
+	}
+
+	return testReponse, nil
 }
