@@ -20,7 +20,7 @@ func NewClient() *Client {
 	return &Client{hc: c}
 }
 
-func (c *Client) CreateRequest(method, url string, RequestBody []byte, BearerToken string) (returnVal *http.Response, err error) {
+func (c *Client) CreateRequestUBL(method, url string, RequestBody []byte, BearerToken string) (returnVal *http.Response, err error) {
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(RequestBody))
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func (c *Client) CreateRequest(method, url string, RequestBody []byte, BearerTok
 	return res, nil
 }
 
-func GetToken() (ApiTokenReponse data.GetTokenStruct, errs error) {
+func GetUBLToken() (ApiTokenReponse data.GetTokenStruct, errs error) {
 	requestBody := data.RequestTokenStruct{Username: "admin", Password: "adminpass"}
 	rawData, marshalErr := json.Marshal(requestBody)
 	if marshalErr != nil {
@@ -60,7 +60,7 @@ func GetToken() (ApiTokenReponse data.GetTokenStruct, errs error) {
 	return ApiTokenReponse, err
 }
 
-func CreateAccount(ctx context.Context, UserData data.CreateAccountRequestStruct, BearerToken string) (returnVal data.CreateAccountResponseStruct, errs error) {
+func CreateUBLAccount(ctx context.Context, UserData data.CreateAccountRequestStruct, BearerToken string) (returnVal data.CreateAccountResponseStruct, errs error) {
 
 	reqData, err := json.Marshal(UserData)
 	if err != nil {
@@ -69,7 +69,7 @@ func CreateAccount(ctx context.Context, UserData data.CreateAccountRequestStruct
 
 	client := NewClient()
 
-	apiRes, err := client.CreateRequest("POST", enums.CreateAccURL, reqData, BearerToken)
+	apiRes, err := client.CreateRequestUBL("POST", enums.CreateAccURL, reqData, BearerToken)
 
 	if err != nil {
 		log.Fatal(err)
@@ -89,41 +89,7 @@ func CreateAccount(ctx context.Context, UserData data.CreateAccountRequestStruct
 
 }
 
-func TestActivity(ctx context.Context, n1 int, n2 int) int {
-	return n1 + n2
+func TestActivity(ctx context.Context, n1 int, n2 int) (response int, errs error) {
+	response = n1 + n2
+	return response, errs
 }
-
-// func CreatePaymentSafepay(ctx context.Context, input data.FinalPaymentRequestStruct) (SafepayCreatePaymentResponse data.CreatePaymentResponseStruct, errs error) {
-
-// 	safepayReq := data.CreatePaymentRequestStructSafepay{
-// 		Amount:      input.Amount,
-// 		Client:      "sec_d64f8626-d820-465b-857e-684afea3c56f",
-// 		Currency:    "PKR",
-// 		Environment: "sandbox",
-// 	}
-
-// 	rawData, err := json.Marshal(safepayReq)
-// 	if err != nil {
-// 		log.Fatal(err, nil)
-// 	}
-
-// 	c := NewClient()
-
-// 	res, err := c.CreateRequest("POST", enums.CreatePaymentURLSafepay, rawData)
-// 	if err != nil {
-// 		log.Fatal(err, nil)
-// 	}
-
-// 	defer res.Body.Close()
-
-// 	SafepayApiResponse, err := ioutil.ReadAll(res.Body)
-// 	if err != nil {
-// 		log.Fatal(err, nil)
-// 	}
-
-// 	json.Unmarshal(SafepayApiResponse, &SafepayCreatePaymentResponse)
-
-// 	log.Print(SafepayCreatePaymentResponse)
-
-// 	return SafepayCreatePaymentResponse, nil
-// }

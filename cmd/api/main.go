@@ -1,16 +1,16 @@
-package main
+// package main
 
-import "github.com/gin-gonic/gin"
+// import "github.com/gin-gonic/gin"
 
-func main() {
-	router := gin.Default()
-	v1 := router.Group("/v1")
-	{
-		meezan := v1.Group("/meezan")
-		{
-			meezan.POST("/receiveToken")
-		}
+// func main() {
+// 	router := gin.Default()
+// 	v1 := router.Group("/v1")
+// 	{
+// 		ubl := v1.Group("/ubl")
+// 		{
+// 			ubl.POST("/receiveToken")
+// 		}
 
-	}
-	router.Run("localhost:8080")
-}
+// 	}
+// 	router.Run("localhost:8080")
+// }

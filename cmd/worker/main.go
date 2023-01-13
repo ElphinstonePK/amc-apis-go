@@ -12,7 +12,7 @@ import (
 const (
 	address   = "15.184.170.196:7233"
 	namespace = "default"
-	taskQueue = "haball"
+	taskQueue = "meezan"
 )
 
 func init() {
